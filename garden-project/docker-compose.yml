@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:latest
+    container_name: garden_redis
+    ports:
+      - "6379:6379"
+
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: garden_mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+
+  socket_server:
+    build: ./socket_server
+    container_name: garden_socket_server
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./socket_server:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - MQTT_HOST=mosquitto
+    depends_on:
+      - mosquitto
+      - redis
+
+  rest_api:
+    build: ./rest_api
+    container_name: garden_rest_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./rest_api:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=mongodb://root:example@192.168.1.134:27017/
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: garden_ngrok
+    environment:
+      - NGROK_AUTHTOKEN=39DwAQd2uLexWNI0tqej0jmky56_31kKhTSQ6rZR9ijThRn5K
+    command:
+      - tcp
+      - mosquitto:1883
+    depends_on:
+      - mosquitto
