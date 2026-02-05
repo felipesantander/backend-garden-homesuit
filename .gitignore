@@ -33,14 +33,14 @@ uv.lock # Often kept, but some prefer to ignore if they want pure pyproject.toml
 
 # Logs
 *.log
-garden-project/mosquitto/log/
-garden-project/socket_server/socket_server.log
+mosquitto/log/
+socket_server/socket_server.log
 
 # Environment files
 .env
 
 # Docker data/logs
-garden-project/mosquitto/data/
+mosquitto/data/
 
 # IDEs
 .vscode/
