@@ -48,3 +48,7 @@ mosquitto/data/
 
 # OS
 .DS_Store
+
+# Redis
+*.rdb
+redis_data/

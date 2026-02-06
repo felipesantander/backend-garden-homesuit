@@ -3,15 +3,15 @@ version: '3.8'
 services:
   redis:
     image: redis:latest
-    container_name: garden_redis
+    container_name: garden_redis_prod
+    restart: always
     ports:
       - "6379:6379"
-    volumes:
-      - ./redis_data:/data
 
   mosquitto:
     image: eclipse-mosquitto:latest
-    container_name: garden_mosquitto
+    container_name: garden_mosquitto_prod
+    restart: always
     ports:
       - "1883:1883"
       - "9001:9001"
@@ -21,12 +21,11 @@ services:
       - ./mosquitto/log:/mosquitto/log
 
   rest_api:
-    build: ./rest_api
-    container_name: garden_rest_api
+    image: ghcr.io/felipesantander/garden.homesuit.cl/rest-api:0.0.1
+    container_name: garden_rest_api_prod
+    restart: always
     ports:
       - "8000:8000"
-    volumes:
-      - ./rest_api:/app
     environment:
       - PYTHONUNBUFFERED=1
       - DATABASE_URL=mongodb://root:example@192.168.1.134:27017/
@@ -37,16 +36,15 @@ services:
       - mosquitto
 
   mqtt_worker:
-    build: ./rest_api
-    container_name: garden_mqtt_worker
-    volumes:
-      - ./rest_api:/app
+    image: ghcr.io/felipesantander/garden.homesuit.cl/rest-api:0.0.1
+    container_name: garden_mqtt_worker_prod
+    restart: always
     environment:
       - PYTHONUNBUFFERED=1
       - DATABASE_URL=mongodb://root:example@192.168.1.134:27017/
       - REDIS_HOST=redis
       - MQTT_HOST=mosquitto
-    command: watchmedo auto-restart --recursive --pattern="*.py" --directory="." python manage.py mqtt
+    command: python manage.py mqtt
     depends_on:
       - mosquitto
       - redis

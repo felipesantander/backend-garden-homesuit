@@ -3,7 +3,7 @@ revision = 3
 requires-python = ">=3.13"
 
 [[package]]
-name = "garden-socket-server"
+name = "mqtt-test-client"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
@@ -11,7 +11,7 @@ dependencies = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "paho-mqtt" }]
+requires-dist = [{ name = "paho-mqtt", specifier = ">=2.1.0" }]
 
 [[package]]
 name = "paho-mqtt"

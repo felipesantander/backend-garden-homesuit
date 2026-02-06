@@ -12,7 +12,6 @@ concurrency:
 
 env:
   VERSION: 0.0.1
-  SOCKET_IMAGE: ghcr.io/${{ github.repository }}/socket-server
   REST_IMAGE: ghcr.io/${{ github.repository }}/rest-api
 
 jobs:
@@ -24,11 +23,6 @@ jobs:
     - name: Log in to GHCR
       run: |
         echo ${{ secrets.GH_PAT }} | docker login --username ${{ github.actor }} ghcr.io --password-stdin
-
-    - name: Build and Push Socket Server
-      run: | 
-        docker build --tag ${{ env.SOCKET_IMAGE }}:latest --tag ${{ env.SOCKET_IMAGE }}:${{ env.VERSION }} -f socket_server/Dockerfile socket_server
-        docker push ${{ env.SOCKET_IMAGE }}:${{ env.VERSION }}
 
     - name: Build and Push REST API
       run: |
@@ -47,13 +41,11 @@ jobs:
             PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
             HOSTNAME: ${{ secrets.EC2_PUBLIC_IP_ADDRESS}}
             USER_NAME: ${{secrets.EC_USER}}
-            IMAGE_SOCKET: ${{ env.SOCKET_IMAGE }}
             IMAGE_REST: ${{ env.REST_IMAGE }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "
           echo ${{ secrets.GH_PAT }} | docker login --username ${{ github.actor }} ghcr.io --password-stdin
-          docker pull ${{ env.IMAGE_SOCKET }}:${{ env.VERSION }}
           docker pull ${{ env.IMAGE_REST }}:${{ env.VERSION }}
           # Aquí podrías agregar comandos para reiniciar los contenedores si fuera necesario
           # cd /path/to/project && docker-compose pull && docker-compose up -d

@@ -12,6 +12,9 @@ dependencies = [
     "pymongo==3.12.1",
     "pytz",
     "sqlparse==0.2.4",
+    "paho-mqtt==1.6.1",
+    "django-mqtt",
+    "watchdog",
 ]
 
 [tool.uv]

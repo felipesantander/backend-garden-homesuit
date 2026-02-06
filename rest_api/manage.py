@@ -3,6 +3,14 @@
 import os
 import sys
 
+# Monkeypatch django.dispatch.Signal to avoid TypeError with dmqtt on Django 4.0+
+# dmqtt uses providing_args which was removed in Django 4.0
+import django.dispatch
+original_signal_init = django.dispatch.Signal.__init__
+def patched_signal_init(self, providing_args=None, use_caching=False):
+    original_signal_init(self, use_caching=use_caching)
+django.dispatch.Signal.__init__ = patched_signal_init
+
 
 def main():
     """Run administrative tasks."""
