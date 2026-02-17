@@ -84,6 +84,8 @@ MQTT_PASS = os.environ.get('MQTT_PASS', '')
 
 
 
+import certifi
+
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
@@ -91,6 +93,7 @@ DATABASES = {
         'ENFORCE_SCHEMA': False,
         'CLIENT': {
             'host': os.environ.get('DATABASE_URL', 'mongodb://localhost:27017/'),
+            'tlsCAFile': certifi.where(),
         }
     }
 }
