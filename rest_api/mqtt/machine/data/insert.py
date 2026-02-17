@@ -26,27 +26,19 @@ def _process_entry(payload, topic, data_model, machine_model, config_channel_mod
     serial_machine = payload["serial_machine"]
     data_type = payload["type"]
 
-    machines = machine_model.objects.filter(serial=serial_machine)
-    count = machines.count()
+    # Since unique=True is enforced, we use .first()
+    machine = machine_model.objects.filter(serial=serial_machine).first()
 
-    if count == 0:
-        logger.warning(f"No machines found with serial {serial_machine}. Ignoring data.")
-        return
+    channel = _save_data_entry(
+        payload, machine, data_type, serial_machine, data_model, config_channel_model, default_channel
+    )
 
-    if count > 1:
-        for machine in machines:
-            channel = _save_data_entry(
-                payload, machine, data_type, serial_machine, data_model, config_channel_model, default_channel
-            )
-            logger.info(
-                f"Data saved for machine {machine.machineId} (Serial: {serial_machine}) on channel {channel.idChannel}"
-            )
-    else:
-        machine = machines.first()
-        channel = _save_data_entry(
-            payload, None, data_type, serial_machine, data_model, config_channel_model, default_channel
+    if machine:
+        logger.info(
+            f"Data saved for machine {machine.machineId} (Serial: {serial_machine}) on channel {channel.idChannel if channel else 'None'}"
         )
-        logger.info(f"Data saved for serial {serial_machine} (single machine) on channel {channel.idChannel}")
+    else:
+        logger.info(f"Data saved for serial {serial_machine} (anonymous) on channel {channel.idChannel if channel else 'None'}")
 
 
 def insert_data(data, topic):
