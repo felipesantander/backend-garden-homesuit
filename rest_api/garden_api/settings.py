@@ -86,17 +86,21 @@ MQTT_PASS = os.environ.get('MQTT_PASS', '')
 
 import certifi
 
+DATABASE_URL = os.environ.get('DATABASE_URL', 'mongodb://localhost:27017/')
+
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
         'NAME': 'garden_db',
         'ENFORCE_SCHEMA': False,
         'CLIENT': {
-            'host': os.environ.get('DATABASE_URL', 'mongodb://localhost:27017/'),
-            'tlsCAFile': certifi.where(),
-        }
+            'host': DATABASE_URL,
+        }   
     }
 }
+
+if 'mongodb+srv' in DATABASE_URL or 'tls=true' in DATABASE_URL.lower():
+    DATABASES['default']['CLIENT']['tlsCAFile'] = certifi.where()
 
 
 # Password validation
