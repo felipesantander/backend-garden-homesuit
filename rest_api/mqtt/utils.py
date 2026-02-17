@@ -2,8 +2,9 @@ import fnmatch
 import json
 import logging
 from functools import wraps
-from dmqtt.signals import message
+
 from django.dispatch import receiver
+from dmqtt.signals import message
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ def mqtt_topic(matcher, as_json=True):
     # Convert MQTT wildcards to fnmatch/glob wildcards
     # + matches one level -> * in glob (if we assume levels are handled)
     # # matches multiple levels -> * in glob
-    # Actually, fnmatch '*' matches everything including slashes. 
+    # Actually, fnmatch '*' matches everything including slashes.
     # So we'll just be careful.
     glob_matcher = matcher.replace('+', '*').replace('#', '*')
 
@@ -31,14 +32,14 @@ def mqtt_topic(matcher, as_json=True):
 
             if fnmatch.fnmatch(msg.topic, glob_matcher):
                 logger.debug(f"Matched topic {msg.topic} with {matcher}")
-                
+
                 # Extract payload
                 try:
                     payload = msg.payload.decode('utf-8') if isinstance(msg.payload, bytes) else msg.payload
                 except UnicodeDecodeError:
                     logger.error(f"Failed to decode payload on topic {msg.topic}")
                     return
-                
+
                 if not payload:
                     logger.debug(f"Empty payload on topic {msg.topic}")
                     return
@@ -56,12 +57,12 @@ def mqtt_topic(matcher, as_json=True):
                 kwargs.pop('topic', None)
                 kwargs.pop('data', None)
                 kwargs.pop('msg', None)
-                
+
                 return func(
-                    sender=sender, 
-                    topic=msg.topic, 
-                    data=processed_data, 
-                    msg=msg, 
+                    sender=sender,
+                    topic=msg.topic,
+                    data=processed_data,
+                    msg=msg,
                     **kwargs
                 )
         return wrapper

@@ -1,7 +1,10 @@
 import uuid
+
 from django.db import models
-from .machine import Machine
+
 from .channel import Channel
+from .machine import Machine
+
 
 class ConfigurationChannel(models.Model):
     idConfigurationChannel = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

@@ -1,6 +1,7 @@
 import logging
-from dmqtt.signals import connect, message
+
 from django.dispatch import receiver
+from dmqtt.signals import connect, message
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +14,7 @@ def on_mqtt_connect(sender, **kwargs):
 @receiver(message)
 def on_mqtt_message(sender, **kwargs):
     logger.debug(f"DEBUG: Signal message received. Arguments: {list(kwargs.keys())}")
-    
+
     msg = kwargs.get('msg')
     if msg:
         topic = msg.topic

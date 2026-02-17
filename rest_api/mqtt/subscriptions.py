@@ -1,4 +1,5 @@
 import logging
+
 from .utils import mqtt_topic
 
 logger = logging.getLogger(__name__)

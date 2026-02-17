@@ -1,7 +1,10 @@
 import uuid
+
 from django.db import models
-from .machine import Machine
+
 from .channel import Channel
+from .machine import Machine
+
 
 class Data(models.Model):
     idData = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -12,7 +15,7 @@ class Data(models.Model):
     value = models.FloatField()
     type = models.CharField(max_length=50)
     serial_machine = models.CharField(max_length=100)
-    
+
     # Relationships
     machineId = models.ForeignKey(Machine, on_delete=models.CASCADE, to_field='machineId', null=True, blank=True)
     channelId = models.ForeignKey(Channel, on_delete=models.CASCADE, to_field='idChannel', null=True, blank=True)

@@ -1,8 +1,11 @@
 import json
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from core.models import Data, Machine, Channel
+
+from core.models import Channel, Data, Machine
 from core.validators import DataValidator
+
 
 @csrf_exempt
 def ingest_data(request):
@@ -16,7 +19,7 @@ def ingest_data(request):
 
     validator = DataValidator()
     is_valid, errors = validator.validate(payload)
-    
+
     if not is_valid:
         return JsonResponse({'error': 'Validation failed', 'details': errors}, status=400)
 
