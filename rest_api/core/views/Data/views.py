@@ -2,9 +2,16 @@ import json
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework import viewsets
 
 from core.models import Channel, Data, Machine
-from core.validators import DataValidator
+from core.serializers import DataSerializer
+from core.validators.data.insert import DataValidator
+
+
+class DataViewSet(viewsets.ModelViewSet):
+    queryset = Data.objects.all()
+    serializer_class = DataSerializer
 
 
 @csrf_exempt

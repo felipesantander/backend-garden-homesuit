@@ -1,15 +1,14 @@
 import uuid
-
 from django.db import models
-
+from core.fields import SafeJSONField
 
 class Permission(models.Model):
     idPermission = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, unique=True)
-    endpoints = models.JSONField(default=list)  # List of allowed endpoints
-    channels = models.JSONField(default=list)  # List of allowed channels
-    machines = models.JSONField(default=list)  # List of allowed machines
-    components = models.JSONField(default=list)  # List of allowed UI components
+    endpoints = SafeJSONField(default=list)  # List of {path: str, host: str, method: str}
+    channels = SafeJSONField(default=list)  # List of allowed channels
+    machines = SafeJSONField(default=list)  # List of allowed machines
+    components = SafeJSONField(default=list)  # List of allowed UI components
 
     def __str__(self):
         return self.name

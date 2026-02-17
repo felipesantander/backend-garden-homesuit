@@ -15,13 +15,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         if user_role:
             role = user_role.role
             token["role"] = role.name
-            
+
             # Gather all components from all permissions of the role
             components = set()
             for permission in role.permissions.all():
                 if permission.components:
                     components.update(permission.components)
-            
+
             token["components"] = list(components)
         else:
             token["role"] = None
@@ -31,9 +31,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
-        
+
         # Add extra response data if needed
-        data["user_id"] = self.user.id
-        data["role"] = self.user.user_roles.first().role.name if self.user.user_roles.exists() else None
-        
+        data["id_usuario"] = self.user.id
+        data["role"] = (
+            self.user.user_roles.first().role.name
+            if self.user.user_roles.count() > 0
+            else None
+        )
+
         return data
