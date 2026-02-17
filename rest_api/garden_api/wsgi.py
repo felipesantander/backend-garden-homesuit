@@ -13,12 +13,16 @@ import os
 import django.dispatch
 
 original_signal_init = django.dispatch.Signal.__init__
-def patched_signal_init(self, providing_args=None, use_caching=False):
+
+
+def patched_signal_init(self, providing_args=None, use_caching=False):  # noqa: ARG001
     original_signal_init(self, use_caching=use_caching)
+
+
 django.dispatch.Signal.__init__ = patched_signal_init
 
-from django.core.wsgi import get_wsgi_application
+from django.core.wsgi import get_wsgi_application  # noqa: E402
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'garden_api.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "garden_api.settings")
 
 application = get_wsgi_application()

@@ -1,3 +1,2 @@
-from . import connection, data, subscriptions
-
-__all__ = ["connection", "data", "subscriptions"]
+# MQTT package
+# Imports are deferred to MqttConfig.ready() to avoid early model access

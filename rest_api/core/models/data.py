@@ -17,8 +17,11 @@ class Data(models.Model):
     serial_machine = models.CharField(max_length=100)
 
     # Relationships
-    machineId = models.ForeignKey(Machine, on_delete=models.CASCADE, to_field='machineId', null=True, blank=True)
-    channelId = models.ForeignKey(Channel, on_delete=models.CASCADE, to_field='idChannel', null=True, blank=True)
+    machineId = models.ForeignKey(Machine, on_delete=models.CASCADE, to_field="machineId", null=True, blank=True)
+    channelId = models.ForeignKey(Channel, on_delete=models.CASCADE, to_field="idChannel", null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "Data"
+        indexes = [
+            models.Index(fields=["machineId", "channelId", "date_of_capture", "frequency"]),
+        ]

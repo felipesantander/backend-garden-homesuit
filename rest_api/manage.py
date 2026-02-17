@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
+
 import os
 import sys
 
@@ -8,14 +9,18 @@ import sys
 import django.dispatch
 
 original_signal_init = django.dispatch.Signal.__init__
-def patched_signal_init(self, providing_args=None, use_caching=False):
+
+
+def patched_signal_init(self, providing_args=None, use_caching=False):  # noqa: ARG001
     original_signal_init(self, use_caching=use_caching)
+
+
 django.dispatch.Signal.__init__ = patched_signal_init
 
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'garden_api.settings')
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "garden_api.settings")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -27,5 +32,5 @@ def main():
     execute_from_command_line(sys.argv)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

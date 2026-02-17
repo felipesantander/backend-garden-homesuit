@@ -17,6 +17,9 @@ dependencies = [
     "watchdog",
     "dnspython",
     "certifi",
+    "djangorestframework>=3.15.1",
+    "djangorestframework-simplejwt>=5.3.1",
+    "pyjwt>=2.11.0",
 ]
 
 [tool.uv]
@@ -35,17 +38,23 @@ line-length = 120
 [tool.ruff.lint]
 # Select rules to enable
 select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "B",   # flake8-bugbear
-    "C4",  # flake8-comprehensions
-    "UP",  # pyupgrade
-    "N",   # pep8-naming
+"E",    # Errores de estilo (pycodestyle)
+    "W",    # Advertencias de estilo (pycodestyle)
+    "F",    # Errores lógicos (Pyflakes)
+    "I",    # Orden de imports (isort)
+    "N",    # Convenciones de nombres (pep8-naming)
+    "B",    # Prevención de bugs comunes (flake8-bugbear)
+    "UP",   # Actualización a sintaxis moderna (pyupgrade)
+    "C4",   # Optimización de comprensiones (flake8-comprehensions)
+    "PTH",  # Forzar uso de Pathlib (flake8-use-pathlib)
+    "RUF",  # Reglas específicas de Ruff (muy útiles)
+    "SIM",  # Simplificación de código (flake8-simplify)
+    "ARG",  # Detectar argumentos no usados (flake8-unused-arguments)
 ]
 ignore = [
     "E501",  # Line too long (handled by formatter)
+    "N815",  # mixedCase variables in class scope (Django fields)
+    "RUF012", # Mutable class attributes (standard Django patterns)
 ]
 
 [tool.ruff.format]

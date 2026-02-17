@@ -12,17 +12,14 @@ def to_datetime(value):
             return value
     return value
 
+
 # Cerberus schema for machine data
 DATA_SCHEMA = {
-    'date_of_capture': {
-        'type': 'datetime',
-        'required': True,
-        'coerce': to_datetime
-    },
-    'frequency': {'type': 'float', 'required': True},
-    'value': {'type': 'float', 'required': True},
-    'type': {'type': 'string', 'required': True},
-    'serial_machine': {'type': 'string', 'required': True},
+    "date_of_capture": {"type": "datetime", "required": True, "coerce": to_datetime},
+    "frequency": {"type": "float", "required": True},
+    "value": {"type": "float", "required": True},
+    "type": {"type": "string", "required": True},
+    "serial_machine": {"type": "string", "required": True},
 }
 
 # Schema for handle_machine_data input (kwargs)
