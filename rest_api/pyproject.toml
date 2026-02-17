@@ -15,6 +15,7 @@ dependencies = [
     "paho-mqtt==1.6.1",
     "django-mqtt",
     "watchdog",
+    "dnspython",
 ]
 
 [tool.uv]
