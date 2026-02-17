@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  VERSION: 0.0.1
+  VERSION: 0.0.2
   REST_IMAGE: ghcr.io/${{ github.repository }}/rest-api
 
 jobs:
