@@ -6,8 +6,11 @@ logger = logging.getLogger(__name__)
 
 def _save_data_entry(payload, machine, data_type, serial_machine, data_model, config_channel_model, default_channel):
     """Helper to resolve channel and save data for a specific machine."""
-    config = config_channel_model.objects.filter(machine=machine, type=data_type).first()
-    channel = config.channel if config else default_channel
+    channel = default_channel
+    if machine:
+        config = config_channel_model.objects.filter(machine=machine, type=data_type).first()
+        if config:
+            channel = config.channel
 
     data_model.objects.create(
         date_of_capture=payload["date_of_capture"],
