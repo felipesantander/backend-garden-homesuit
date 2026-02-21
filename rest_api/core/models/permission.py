@@ -8,6 +8,8 @@ class Permission(models.Model):
     endpoints = SafeJSONField(default=list)  # List of {path: str, host: str, method: str}
     channels = SafeJSONField(default=list)  # List of allowed channels
     machines = SafeJSONField(default=list)  # List of allowed machines
+    gardens = SafeJSONField(default=list)   # List of allowed gardens
+    businesses = SafeJSONField(default=list) # List of allowed businesses
     components = SafeJSONField(default=list)  # List of allowed UI components
 
     def __str__(self):

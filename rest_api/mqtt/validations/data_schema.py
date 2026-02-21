@@ -16,7 +16,7 @@ def to_datetime(value):
 # Cerberus schema for machine data
 DATA_SCHEMA = {
     "date_of_capture": {"type": "datetime", "required": True, "coerce": to_datetime},
-    "frequency": {"type": "float", "required": True},
+    "frequency": {"type": "string", "required": True},
     "value": {"type": "float", "required": True},
     "type": {"type": "string", "required": True},
     "serial_machine": {"type": "string", "required": True},

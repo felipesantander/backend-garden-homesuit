@@ -47,23 +47,7 @@ class Command(BaseCommand):
             'idPermission': str(uuid.uuid4()),
             'name': 'Full Access',
             'endpoints': [
-                {'path': '/api/machines/*', 'host': '*', 'method': 'GET'},
-                {'path': '/api/machines/*', 'host': '*', 'method': 'POST'},
-                {'path': '/api/machines/*', 'host': '*', 'method': 'DELETE'},
-                {'path': '/api/machines/*', 'host': '*', 'method': 'PUT'},
-                {'path': '/api/machines/*', 'host': '*', 'method': 'PATCH'},
-                {'path': '/api/channels/*', 'host': '*', 'method': 'GET'},
-                {'path': '/api/channels/*', 'host': '*', 'method': 'POST'},
-                {'path': '/api/channels/*', 'host': '*', 'method': 'DELETE'},
-                {'path': '/api/channels/*', 'host': '*', 'method': 'PUT'},
-                {'path': '/api/channels/*', 'host': '*', 'method': 'PATCH'},
-                {'path': '/api/data/*', 'host': '*', 'method': 'GET'},
-                {'path': '/api/data/*', 'host': '*', 'method': 'POST'},
-                {'path': '/api/data/*', 'host': '*', 'method': 'DELETE'},
-                {'path': '/api/data/*', 'host': '*', 'method': 'PUT'},
-                {'path': '/api/data/*', 'host': '*', 'method': 'PATCH'},
-                {'path': '/api/token/', 'host': '*', 'method': 'POST'},
-                {'path': '/api/data/ingest/', 'host': '*', 'method': 'POST'},
+                {'path': '/api/*', 'host': '*', 'method': '*'},
             ],
             'components': ['admin_panel', 'dashboard', 'settings']
         }
@@ -121,10 +105,11 @@ class Command(BaseCommand):
         else:
             self.stdout.write(f'Machine "{machine["serial"]}" already exists.')
 
-        # 3.6 Channel
         channel_data = {
             'idChannel': str(uuid.uuid4()),
-            'name': 'Hydraulic Pressure'
+            'name': 'Hydraulic Pressure',
+            'unit': 'V',
+            'business_id': business.get('idBusiness') if isinstance(business, dict) else business.idBusiness
         }
         channel = db.core_channel.find_one({'name': channel_data['name']})
         if not channel:

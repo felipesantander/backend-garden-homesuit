@@ -2,6 +2,7 @@ import logging
 import traceback
 
 from core.models import ConfigurationChannel, Data, Machine, MachineCandidate
+from core.models.data_manager import DataBucketManager
 
 logger = logging.getLogger(__name__)
 
@@ -14,14 +15,14 @@ def _save_data_entry(payload, machine, data_type, serial_machine, default_channe
         if config:
             channel = config.channel
 
-    Data.objects.create(
-        date_of_capture=payload["date_of_capture"],
-        frequency=payload["frequency"],
+    DataBucketManager.add_reading(
+        machine=machine,
+        channel=channel,
+        data_type=data_type,
         value=payload["value"],
-        type=data_type,
-        serial_machine=serial_machine,
-        machineId=machine,
-        channelId=channel,
+        timestamp=payload["date_of_capture"],
+        frequency=payload["frequency"],
+        serial_machine=serial_machine
     )
     return channel
 

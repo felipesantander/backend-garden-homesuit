@@ -14,3 +14,6 @@ class SafeJSONField(models.JSONField):
         if isinstance(value, (list, dict)):
             return value
         return super().from_db_value(value, expression, connection)
+
+    def db_type(self, connection):
+        return 'json'

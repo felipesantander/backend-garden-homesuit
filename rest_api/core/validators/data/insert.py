@@ -1,8 +1,7 @@
 from cerberus import Validator
 
 DATA_SCHEMA = {
-    "dataId": {"type": "string", "required": True},
-    "frequency": {"type": "float", "required": True},
+    "frequency": {"type": "string", "required": True},
     "value": {"type": "float", "required": True},
     "type": {"type": "string", "required": True},
     "serial_machine": {"type": "string", "required": True},

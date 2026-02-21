@@ -16,6 +16,7 @@ class RBACMiddleware:
         # 1. Skip RBAC for non-API endpoints, admin, and token endpoints
         if not request.path.startswith("/api/") or \
            request.path.startswith("/api/token/") or \
+           request.path.startswith("/api/ingest/") or \
            request.path.startswith("/admin/"):
             return self.get_response(request)
 
@@ -62,10 +63,36 @@ class RBACMiddleware:
                                      (endpoint_path.endswith("/") and current_path == endpoint_path[:-1]) or \
                                      (not endpoint_path.endswith("/") and current_path == endpoint_path + "/")
 
-                    method_match = endpoint.get("method") == current_method
+                    method_match = endpoint.get("method") == current_method or endpoint.get("method") == "*"
                     host_match = endpoint.get("host") == current_host or endpoint.get("host") == "*"
 
                     if path_match and method_match and host_match:
+                        # Scoping Check
+                        allowed_gardens = permission.gardens
+                        allowed_businesses = permission.businesses
+                        allowed_machines = permission.machines
+
+                        path_parts = [p for p in current_path.split("/") if p]
+
+                        # Scoping logic: if a scope is defined (not empty), the resource ID must be in it
+                        if allowed_gardens and "gardens" in path_parts:
+                            idx = path_parts.index("gardens")
+                            if len(path_parts) > idx + 1:
+                                if path_parts[idx + 1] not in allowed_gardens:
+                                    continue
+                        
+                        if allowed_businesses and "businesses" in path_parts:
+                            idx = path_parts.index("businesses")
+                            if len(path_parts) > idx + 1:
+                                if path_parts[idx + 1] not in allowed_businesses:
+                                    continue
+
+                        if allowed_machines and "machines" in path_parts:
+                            idx = path_parts.index("machines")
+                            if len(path_parts) > idx + 1:
+                                if path_parts[idx + 1] not in allowed_machines:
+                                    continue
+
                         is_authorized = True
                         break
                 if is_authorized:

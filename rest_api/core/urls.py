@@ -10,6 +10,7 @@ from core.views.Business.views import BusinessViewSet
 from core.views.Channel.views import ChannelViewSet
 from core.views.ConfigurationChannel.views import ConfigurationChannelViewSet
 from core.views.Data.views import DataViewSet, ingest_data
+from core.views.Garden.views import GardenViewSet
 from core.views.Machine.views import MachineViewSet
 from core.views.MachineCandidate.views import MachineCandidateViewSet
 from core.views.Notification.views import NotificationViewSet
@@ -22,6 +23,7 @@ router.register(r"machines", MachineViewSet)
 router.register(r"channels", ChannelViewSet)
 router.register(r"data", DataViewSet)
 router.register(r"businesses", BusinessViewSet)
+router.register(r"gardens", GardenViewSet)
 router.register(r"notifications", NotificationViewSet)
 router.register(r"permissions", PermissionViewSet)
 router.register(r"roles", RoleViewSet)
@@ -31,7 +33,7 @@ router.register(r"machine-candidates", MachineCandidateViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),
-    path("data/ingest/", ingest_data, name="ingest_data"),
+    path("ingest/", ingest_data, name="ingest_data"),
     path("token/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("token/verify/", TokenVerifyView.as_view(), name="token_verify"),

@@ -29,7 +29,11 @@ SECRET_KEY = "django-insecure-prh*tatgepv2bdvo9x_z^0hh3a+g0*-er#v5afc7di6&12*sy2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["192.168.1.134", "localhost", "127.0.0.1", "*"]
+
+# CORS Configuration
+CORS_ALLOW_ALL_ORIGINS = True  # For development. Change to specific origins for production.
+CORS_ALLOW_CREDENTIALS = True
 
 
 INSTALLED_APPS = [
@@ -44,6 +48,7 @@ INSTALLED_APPS = [
     "dmqtt",
     "rest_framework",
     "rest_framework_simplejwt",
+    "corsheaders",
 ]
 
 REST_FRAMEWORK = {
@@ -77,6 +82,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "core.middleware.rbac.RBACMiddleware",
 ]
 

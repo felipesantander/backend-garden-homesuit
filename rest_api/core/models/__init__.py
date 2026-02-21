@@ -2,6 +2,7 @@ from .business import Business
 from .channel import Channel
 from .configuration_channel import ConfigurationChannel
 from .data import Data
+from .garden import Garden
 from .machine import Machine
 from .machine_candidate import MachineCandidate
 from .notification import Notification
@@ -14,6 +15,7 @@ __all__ = [
     "Channel",
     "ConfigurationChannel",
     "Data",
+    "Garden",
     "Machine",
     "MachineCandidate",
     "Notification",
