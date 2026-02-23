@@ -6,6 +6,7 @@ class DataQuerySerializer(serializers.Serializer):
     start = serializers.DateTimeField(required=False, allow_null=True)
     end = serializers.DateTimeField(required=False, allow_null=True)
     f = serializers.CharField(required=False, allow_blank=True)
+    limit = serializers.IntegerField(required=False, min_value=1)
 
     def validate_channels(self, value):
         if not value:

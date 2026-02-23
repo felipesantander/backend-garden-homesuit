@@ -66,9 +66,23 @@ class DataViewSet(viewsets.ModelViewSet):
         if end_dt:
             queryset = queryset.filter(base_date__lte=end_dt)
 
+        limit = validated_data.get("limit")
         results = []
-        for bucket in queryset.order_by("base_date"):
-            for reading in bucket.readings:
+        
+        # If limit is set, we traverse buckets from newest to oldest for efficiency
+        order = "-base_date" if limit else "base_date"
+        queryset = queryset.order_by(order)
+        
+        if limit:
+            queryset = queryset[:limit]
+        
+        for bucket in queryset:
+            # Sort readings in bucket: if retrieving by limit, newest readings in bucket first
+            bucket_readings = bucket.readings
+            if limit:
+                bucket_readings = reversed(bucket_readings)
+
+            for reading in bucket_readings:
                 try:
                     r_time = datetime.fromisoformat(reading["t"].replace('Z', '+00:00'))
                 except ValueError:
@@ -90,6 +104,16 @@ class DataViewSet(viewsets.ModelViewSet):
                     "timestamp": reading["t"],
                     "frequency": reading["f"]
                 })
+
+                if limit and len(results) >= limit:
+                    break
+            
+            if limit and len(results) >= limit:
+                break
+
+        # If we traversed in reverse for limit, reverse results back to chronological order (oldest -> newest)
+        if limit:
+            results.reverse()
 
         return Response(results)
 
