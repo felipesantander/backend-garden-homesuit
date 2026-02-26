@@ -43,8 +43,9 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f'User "admin" created (ID: {user.id}).'))
 
         # 3.1 Permission
+        perm_uuid = uuid.uuid4()
         perm_data = {
-            'idPermission': str(uuid.uuid4()),
+            'idPermission': perm_uuid,
             'name': 'Full Access',
             'endpoints': [
                 {'path': '/api/*', 'host': '*', 'method': '*'},
@@ -58,11 +59,12 @@ class Command(BaseCommand):
             upsert=True
         )
         perm = db.core_permission.find_one({'name': perm_data['name']})
+        perm_id = perm['idPermission']
         self.stdout.write(f'Permission "{perm["name"]}" updated/synchronized.')
 
         # 3.2 Role
         role_data = {
-            'idRole': str(uuid.uuid4()),
+            'idRole': uuid.uuid4(),
             'name': 'SuperAdmin'
         }
         role = db.core_role.find_one({'name': role_data['name']})
@@ -72,28 +74,31 @@ class Command(BaseCommand):
             self.stdout.write(f'Role "{role["name"]}" created.')
         else:
             self.stdout.write(f'Role "{role["name"]}" already exists.')
+        
+        role_id = role['idRole']
 
         # 3.3 Role-Permission Relationship (M2M table)
-        if not db.core_role_permissions.find_one({'role_id': role['idRole'], 'permission_id': perm['idPermission']}):
+        if not db.core_role_permissions.find_one({'role_id': role_id, 'permission_id': perm_id}):
             db.core_role_permissions.insert_one({
                 'id': int(uuid.uuid4().int >> 96),
-                'role_id': role['idRole'],
-                'permission_id': perm['idPermission']
+                'role_id': role_id,
+                'permission_id': perm_id
             })
             self.stdout.write('Relation Role-Permission linked.')
 
         # 3.4 UserRole (Mapping User to Role)
-        if not db.core_userrole.find_one({'user_id': user.id, 'role_id': role['idRole']}):
+        if not db.core_userrole.find_one({'user_id': user.id, 'role_id': role_id}):
             db.core_userrole.insert_one({
-                'idUserRole': str(uuid.uuid4()),
+                'idUserRole': uuid.uuid4(),
                 'user_id': user.id,
-                'role_id': role['idRole']
+                'role_id': role_id
             })
             self.stdout.write('User assigned to SuperAdmin role.')
 
         # 3.5 Machine
+        machine_uuid = uuid.uuid4()
         machine_data = {
-            'machineId': str(uuid.uuid4()),
+            'machineId': machine_uuid,
             'serial': 'SN010',
             'Name': 'Engine Monitor 10'
         }
@@ -104,42 +109,47 @@ class Command(BaseCommand):
             self.stdout.write(f'Machine "{machine["serial"]}" created.')
         else:
             self.stdout.write(f'Machine "{machine["serial"]}" already exists.')
+        
+        machine_id = machine['machineId']
 
+        channel_uuid = uuid.uuid4()
         channel_data = {
-            'idChannel': str(uuid.uuid4()),
+            'idChannel': channel_uuid,
             'name': 'Hydraulic Pressure',
             'unit': 'V',
-            'business_id': business.get('idBusiness') if isinstance(business, dict) else business.idBusiness
+            'color': '#3498db',
+            'icon': 'water-outline',
         }
+        db.core_channel.replace_one(
+            {'name': channel_data['name']},
+            channel_data,
+            upsert=True
+        )
         channel = db.core_channel.find_one({'name': channel_data['name']})
-        if not channel:
-            db.core_channel.insert_one(channel_data)
-            channel = channel_data
-            self.stdout.write(f'Channel "{channel["name"]}" created.')
-        else:
-            self.stdout.write(f'Channel "{channel["name"]}" already exists.')
+        channel_id = channel['idChannel']
+        self.stdout.write(f'Channel "{channel["name"]}" updated/synchronized.')
 
         # 3.7 Data
         data_sample = {
-            'idData': str(uuid.uuid4()),
+            'idData': uuid.uuid4(),
             'dataId': 'D_SEED_001',
             'frequency': 2.5,
             'value': 120.0,
             'type': 'float',
             'serial_machine': machine['serial'],
-            'machineId_id': machine['machineId'],
-            'channelId_id': channel['idChannel']
+            'machineId_id': machine_id,
+            'channelId_id': channel_id
         }
         if not db.core_data.find_one({'dataId': data_sample['dataId']}):
             db.core_data.insert_one(data_sample)
             self.stdout.write(f'Data sample "{data_sample["dataId"]}" created.')
 
         # 3.8 Business
-        if not db.core_business.find_one({'user_id': user.id, 'machine_id': machine['machineId']}):
+        if not db.core_business.find_one({'user_id': user.id, 'machine_id': machine_id}):
             db.core_business.insert_one({
-                'idBusiness': str(uuid.uuid4()),
+                'idBusiness': uuid.uuid4(),
                 'user_id': user.id,
-                'machine_id': machine['machineId']
+                'machine_id': machine_id
             })
             self.stdout.write('Business relation created.')
 

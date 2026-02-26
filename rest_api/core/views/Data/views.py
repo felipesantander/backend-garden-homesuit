@@ -99,7 +99,7 @@ class DataViewSet(viewsets.ModelViewSet):
                 results.append({
                     "machineId": str(bucket.machineId_id),
                     "channelId": str(bucket.channelId_id),
-                    "type": bucket.channelId.name,
+                    "type": bucket.channelId.name if bucket.channelId else bucket.type,
                     "value": reading["v"],
                     "timestamp": reading["t"],
                     "frequency": reading["f"]

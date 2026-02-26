@@ -53,7 +53,7 @@ class Command(BaseCommand):
         role = db.core_role.find_one({'name': role_name})
         
         if not role:
-            role_id = str(uuid.uuid4())
+            role_id = uuid.uuid4()
             role_data = {
                 'idRole': role_id,
                 'name': role_name
@@ -65,12 +65,43 @@ class Command(BaseCommand):
             role_id = role['idRole']
             self.stdout.write(f'Role "{role_name}" found.')
 
-        # 4. Assign Role to User (UserRole mapping)
+        # 4. Ensure Full Access Permission exists
+        perm_name = 'Full Access'
+        perm = db.core_permission.find_one({'name': perm_name})
+        if not perm:
+            perm_id = uuid.uuid4()
+            perm_data = {
+                'idPermission': perm_id,
+                'name': perm_name,
+                'endpoints': [{'path': '/api/*', 'host': '*', 'method': '*'}],
+                'gardens': [],
+                'businesses': [],
+                'machines': [],
+                'channels': [],
+                'components': ['admin_panel', 'dashboard', 'settings']
+            }
+            db.core_permission.insert_one(perm_data)
+            perm = perm_data
+            self.stdout.write(f'Permission "{perm_name}" created.')
+        else:
+            perm_id = perm['idPermission']
+            self.stdout.write(f'Permission "{perm_name}" found.')
+
+        # 5. Link Role and Permission
+        if not db.core_role_permissions.find_one({'role_id': role_id, 'permission_id': perm_id}):
+            db.core_role_permissions.insert_one({
+                'id': int(uuid.uuid4().int >> 96),
+                'role_id': role_id,
+                'permission_id': perm_id
+            })
+            self.stdout.write('Relation Role-Permission linked.')
+
+        # 6. Assign Role to User (UserRole mapping)
         user_role_exists = db.core_userrole.find_one({'user_id': user.id, 'role_id': role_id})
         
         if not user_role_exists:
             db.core_userrole.insert_one({
-                'idUserRole': str(uuid.uuid4()),
+                'idUserRole': uuid.uuid4(),
                 'user_id': user.id,
                 'role_id': role_id
             })
