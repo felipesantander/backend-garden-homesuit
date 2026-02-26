@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from core.models import Machine, Channel, ConfigurationChannel
 from core.serializers import MachineSerializer
 from core.serializers.Machine.register import MachineRegistrationSerializer
+from core.serializers.Machine.update import MachineUpdateSerializer
 
 
 class MachineViewSet(viewsets.ModelViewSet):
@@ -23,14 +24,7 @@ class MachineViewSet(viewsets.ModelViewSet):
         name = validated_data["Name"]
         garden_id = validated_data.get("garden")
         supported_frequencies = validated_data.get("supported_frequencies", [])
-        
-        # Ensure 1_minutes is always present in supported frequencies
-        if "1_minutes" not in supported_frequencies:
-            supported_frequencies.append("1_minutes")
-            
-        # 1_minutes should be the final value as requested
-        dashboard_frequency = "1_minutes"
-
+        dashboard_frequency = validated_data.get("dashboard_frequency", "1_minutes")
         configurations = validated_data.get("configurations", [])
 
         try:
@@ -79,3 +73,60 @@ class MachineViewSet(viewsets.ModelViewSet):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = MachineUpdateSerializer(instance, data=request.data, partial=partial)
+        
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        validated_data = serializer.validated_data
+        serial = validated_data.get("serial", instance.serial)
+        name = validated_data.get("Name", instance.Name)
+        garden_id = validated_data.get("garden", instance.garden_id)
+        supported_frequencies = validated_data.get("supported_frequencies", instance.supported_frequencies)
+        dashboard_frequency = validated_data.get("dashboard_frequency", instance.dashboard_frequency)
+        configurations = validated_data.get("configurations")
+
+        with transaction.atomic():
+            # Update Machine
+            instance.serial = serial
+            instance.Name = name
+            instance.garden_id = garden_id
+            instance.supported_frequencies = supported_frequencies
+            instance.dashboard_frequency = dashboard_frequency
+            instance.save()
+
+            if configurations is not None:
+                # Clear existing configurations
+                ConfigurationChannel.objects.filter(machine=instance).delete()
+                
+                # Create new configurations
+                created_configs = []
+                for config in configurations:
+                    c_type = config["type"]
+                    channel_id = config["channel"]
+                    channel = Channel.objects.get(idChannel=channel_id)
+
+                    conf_obj = ConfigurationChannel.objects.create(
+                        machine=instance,
+                        type=c_type,
+                        channel=channel,
+                        serial=serial
+                    )
+                    created_configs.append({
+                        "id": str(conf_obj.idConfigurationChannel),
+                        "type": c_type,
+                        "channel": str(channel.idChannel),
+                        "channel_name": channel.name
+                    })
+
+        # Return the updated machine data
+        response_serializer = self.get_serializer(instance)
+        data = response_serializer.data
+        if configurations is not None:
+            data["configurations"] = created_configs
+        
+        return Response(data)

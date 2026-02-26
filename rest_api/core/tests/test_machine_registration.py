@@ -132,6 +132,7 @@ class TestMachineRegistration:
         machine = Machine.objects.get(serial="SER_V1_002")
         # Should have both 5_minutes and 1_minutes
         assert "5_minutes" in machine.supported_frequencies
-        assert "1_minutes" in machine.supported_frequencies
-        # Should be set to 1_minutes default as per request
-        assert machine.dashboard_frequency == "1_minutes"
+        # Should NOT have 1_minutes if it wasn't in the payload
+        assert "1_minutes" not in machine.supported_frequencies
+        # Should be set to 5_minutes as per payload
+        assert machine.dashboard_frequency == "5_minutes"
