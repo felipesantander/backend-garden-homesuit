@@ -9,7 +9,7 @@ class Machine(models.Model):
     Name = models.CharField(max_length=255)
     garden = models.ForeignKey("core.Garden", on_delete=models.CASCADE, related_name="machines", null=True, blank=True)
     supported_frequencies = SafeJSONField(default=list)
-    dashboardFrequency = models.CharField(max_length=50, default="1_minutes")
+    dashboard_frequency = models.CharField(max_length=50, default="1_minutes")
 
     def __str__(self):
         return f"{self.Name} ({self.machineId})"

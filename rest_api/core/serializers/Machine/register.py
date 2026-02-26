@@ -14,7 +14,7 @@ class MachineRegistrationSerializer(serializers.Serializer):
         required=False,
         default=[]
     )
-    dashboardFrequency = serializers.CharField(max_length=50, required=False, default="1_minutes")
+    dashboard_frequency = serializers.CharField(max_length=50, required=False, default="1_minutes")
     configurations = ConfigurationItemSerializer(many=True, required=False, default=[])
 
     def validate_serial(self, value):

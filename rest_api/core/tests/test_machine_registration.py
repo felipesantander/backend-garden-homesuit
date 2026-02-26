@@ -15,7 +15,7 @@ class TestMachineRegistration:
             "serial": "SER_REG_001",
             "Name": "New Test Machine",
             "supported_frequencies": ["1_seconds", "1_minutes", "x_hours"],
-            "dashboardFrequency": "1_minutes",
+            "dashboard_frequency": "1_minutes",
             "configurations": [
                 {"type": "voltage", "channel": str(channel1.idChannel)},
                 {"type": "current", "channel": str(channel2.idChannel)}
@@ -29,7 +29,7 @@ class TestMachineRegistration:
         machine = Machine.objects.get(serial="SER_REG_001")
         assert machine.Name == "New Test Machine"
         assert machine.supported_frequencies == ["1_seconds", "1_minutes", "x_hours"]
-        assert machine.dashboardFrequency == "1_minutes"
+        assert machine.dashboard_frequency == "1_minutes"
         
         # Verify configurations exist
         configs = list(ConfigurationChannel.objects.filter(machine=machine))
@@ -113,3 +113,25 @@ class TestMachineRegistration:
         response = authenticated_client.post(self.endpoint, payload, format="json")
         assert response.status_code == 400
         assert "Name" in response.data
+
+    def test_register_frequency_logic(self, authenticated_client):
+        """Verify that 1_minutes is added and set as default dashboard frequency."""
+        payload = {
+            "serial": "SER_V1_002",
+            "Name": "co simon",
+            "garden": str(uuid.uuid4()),
+            "supported_frequencies": ["5_minutes"],
+            "dashboard_frequency": "5_minutes",
+            "configurations": []
+        }
+
+        response = authenticated_client.post(self.endpoint, payload, format="json")
+        assert response.status_code == 201
+        
+        # Verify machine exists and has correct frequency settings
+        machine = Machine.objects.get(serial="SER_V1_002")
+        # Should have both 5_minutes and 1_minutes
+        assert "5_minutes" in machine.supported_frequencies
+        assert "1_minutes" in machine.supported_frequencies
+        # Should be set to 1_minutes default as per request
+        assert machine.dashboard_frequency == "1_minutes"

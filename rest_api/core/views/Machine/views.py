@@ -23,7 +23,14 @@ class MachineViewSet(viewsets.ModelViewSet):
         name = validated_data["Name"]
         garden_id = validated_data.get("garden")
         supported_frequencies = validated_data.get("supported_frequencies", [])
-        dashboard_frequency = validated_data.get("dashboardFrequency", "1_minutes")
+        
+        # Ensure 1_minutes is always present in supported frequencies
+        if "1_minutes" not in supported_frequencies:
+            supported_frequencies.append("1_minutes")
+            
+        # 1_minutes should be the final value as requested
+        dashboard_frequency = "1_minutes"
+
         configurations = validated_data.get("configurations", [])
 
         try:
@@ -33,7 +40,7 @@ class MachineViewSet(viewsets.ModelViewSet):
                 Name=name,
                 garden_id=garden_id,
                 supported_frequencies=supported_frequencies,
-                dashboardFrequency=dashboard_frequency
+                dashboard_frequency=dashboard_frequency
             )
 
             try:
