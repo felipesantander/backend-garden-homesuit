@@ -56,3 +56,7 @@ redis_data/
 # Django Migrations
 **/migrations/*.py
 !**/migrations/__init__.py
+
+# Celery
+celerybeat-schedule*
+celerybeat.pid

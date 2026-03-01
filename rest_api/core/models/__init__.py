@@ -1,3 +1,6 @@
+from .alert_history import AlertHistory
+from .alert import Alert, AlertCriteria
+from .alert_state import AlertState
 from .business import Business
 from .channel import Channel
 from .configuration_channel import ConfigurationChannel
@@ -11,6 +14,10 @@ from .role import Role
 from .user_role import UserRole
 
 __all__ = [
+    "Alert",
+    "AlertCriteria",
+    "AlertHistory",
+    "AlertState",
     "Business",
     "Channel",
     "ConfigurationChannel",

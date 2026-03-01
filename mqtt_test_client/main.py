@@ -15,7 +15,7 @@ DEFAULT_FREQUENCY = "1_minutes"
 # Sensor definitions with realistic ranges
 SENSORS = {
     "voltage": {"min": 210.0, "max": 240.0, "unit": "V"},
-    "current": {"min": 0.0, "max": 15.0, "unit": "A"},
+    "current": {"min": 10.0, "max": 15.0, "unit": "A"},
     "temperature": {"min": 15.0, "max": 35.0, "unit": "°C"},
     "humidity": {"min": 30.0, "max": 80.0, "unit": "%"},
     "power": {"min": 0.0, "max": 3500.0, "unit": "W"},
@@ -44,8 +44,8 @@ def run():
 
     try:
         while True:
-            # Randomly decide which sensors to send in this batch (at least one)
-            types_to_send = random.sample(list(SENSORS.keys()), random.randint(1, len(SENSORS)))
+            # Send all sensors in this batch
+            types_to_send = list(SENSORS.keys())
             
             # Since the current backend expects a list of entries and processes them one by one,
             # and DataBucketManager creates buckets by type, we can send them in a single batch

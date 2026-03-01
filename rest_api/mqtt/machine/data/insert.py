@@ -14,7 +14,7 @@ def _save_data_entry(payload, machine, data_type, serial_machine, default_channe
         config = ConfigurationChannel.objects.filter(machine=machine, type=data_type).first()
         if config:
             channel = config.channel
-
+    logger.info(f"Data saved for machine {machine.machineId} (Serial: {serial_machine}) on channel {channel.idChannel if channel else 'None'}")
     DataBucketManager.add_reading(
         machine=machine,
         channel=channel,

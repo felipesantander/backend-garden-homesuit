@@ -11,6 +11,10 @@ from core.models import (
     Permission,
     Role,
     UserRole,
+    Alert,
+    AlertCriteria,
+    AlertHistory,
+    AlertState,
 )
 
 
@@ -50,3 +54,33 @@ admin.site.register(Notification)
 admin.site.register(Permission)
 admin.site.register(Role)
 admin.site.register(UserRole)
+
+
+class AlertCriteriaInline(admin.TabularInline):
+    model = AlertCriteria
+    extra = 1
+
+
+@admin.register(Alert)
+class AlertAdmin(admin.ModelAdmin):
+    list_display = ("idAlert", "name", "is_active", "data_frequency", "duration")
+    search_fields = ("name",)
+    list_filter = ("is_active", "data_frequency")
+    inlines = [AlertCriteriaInline]
+
+
+@admin.register(AlertHistory)
+class AlertHistoryAdmin(admin.ModelAdmin):
+    list_display = ("machine", "alert", "triggered_at")
+    list_filter = ("triggered_at", "alert")
+    readonly_fields = ("machine", "alert", "triggered_at", "details", "contacts_notified")
+
+
+@admin.register(AlertState)
+class AlertStateAdmin(admin.ModelAdmin):
+    list_display = ("alert", "machine", "current_status", "last_triggered_at")
+    list_filter = ("current_status",)
+    readonly_fields = ("alert", "machine", "last_triggered_at", "last_condition_met_at")
+
+
+admin.site.register(AlertCriteria)

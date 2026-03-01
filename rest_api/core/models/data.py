@@ -15,7 +15,7 @@ class Data(models.Model):
     serial_machine = models.CharField(max_length=100)
     frequency = models.CharField(max_length=50, null=True, blank=True)
 
-    # Bucketed readings: list of {value: float, timestamp: str, frequency: float}
+    # Bucketed readings: list of {v: float, t: str, f: str}
     readings = SafeJSONField(default=list)
     count = models.IntegerField(default=0)
 

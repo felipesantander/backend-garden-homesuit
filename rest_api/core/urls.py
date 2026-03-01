@@ -6,6 +6,8 @@ from rest_framework_simplejwt.views import (
 )
 
 from core.views.auth.token import CustomTokenObtainPairView
+from core.views.Alert.views import AlertViewSet
+from core.views.Alert.history import AlertHistoryViewSet
 from core.views.Business.views import BusinessViewSet
 from core.views.Channel.views import ChannelViewSet
 from core.views.ConfigurationChannel.views import ConfigurationChannelViewSet
@@ -30,6 +32,8 @@ router.register(r"roles", RoleViewSet)
 router.register(r"user-roles", UserRoleViewSet)
 router.register(r"configuration-channels", ConfigurationChannelViewSet)
 router.register(r"machine-candidates", MachineCandidateViewSet)
+router.register(r"alerts", AlertViewSet)
+router.register(r"alert-history", AlertHistoryViewSet, basename="alert-history")
 
 urlpatterns = [
     path("", include(router.urls)),

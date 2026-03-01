@@ -1,3 +1,4 @@
+from .Alert.serializers import AlertSerializer
 from .auth.token import CustomTokenObtainPairSerializer
 from .Business.serializers import BusinessSerializer
 from .Channel.serializers import ChannelSerializer
@@ -12,6 +13,7 @@ from .Role.serializers import RoleSerializer
 from .UserRole.serializers import UserRoleSerializer
 
 __all__ = [
+    "AlertSerializer",
     "BusinessSerializer",
     "ChannelSerializer",
     "ConfigurationChannelSerializer",

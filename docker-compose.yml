@@ -50,3 +50,31 @@ services:
     depends_on:
       - mosquitto
       - redis
+
+  celery_worker:
+    build: ./rest_api
+    container_name: garden_celery_worker
+    volumes:
+      - ./rest_api:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=mongodb://root:example@192.168.1.134:27017/
+      - REDIS_HOST=redis
+    command: watchmedo auto-restart --recursive --pattern="*.py" --directory="." -- sh -c "celery -A garden_api worker -l info"
+    depends_on:
+      - redis
+      - rest_api
+
+  celery_beat:
+    build: ./rest_api
+    container_name: garden_celery_beat
+    volumes:
+      - ./rest_api:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=mongodb://root:example@192.168.1.134:27017/
+      - REDIS_HOST=redis
+    command: watchmedo auto-restart --recursive --pattern="*.py" --directory="." -- sh -c "celery -A garden_api beat -l info"
+    depends_on:
+      - redis
+      - rest_api

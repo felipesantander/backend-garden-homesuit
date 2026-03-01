@@ -14,7 +14,7 @@ def on_mqtt_connect(sender, **_kwargs):
 
 
 @receiver(message)
-def on_mqtt_message(_sender, **kwargs):
+def on_mqtt_message(sender, **kwargs):
     logger.debug(f"DEBUG: Signal message received. Arguments: {list(kwargs.keys())}")
 
     msg = kwargs.get("msg")

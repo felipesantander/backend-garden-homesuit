@@ -208,3 +208,24 @@ LOGGING = {
         },
     },
 }
+
+# Celery Configuration
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", f"redis://{os.environ.get('REDIS_HOST', 'localhost')}:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", f"redis://{os.environ.get('REDIS_HOST', 'localhost')}:6379/0")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+
+# Celery Beat Schedule
+CELERY_BEAT_SCHEDULE = {
+    "monitor-alerts": {
+        "task": "core.tasks.alerts.monitor_alerts_task",
+        "schedule": 60.0,
+    },
+}
+
+# Green API
+GREEN_API_HOST = "https://7103.api.greenapi.com"
+GREEN_API_INSTANCE_ID = "7103533184"
+GREEN_API_TOKEN = "4296b06a92ff4fc8ae70c40b26730c69d11be343e92848d889"
