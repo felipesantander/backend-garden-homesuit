@@ -19,6 +19,8 @@ from core.views.Notification.views import NotificationViewSet
 from core.views.Permission.views import PermissionViewSet
 from core.views.Role.views import RoleViewSet
 from core.views.UserRole.views import UserRoleViewSet
+from core.views.User.views import UserViewSet
+from core.views.UserBusiness.views import UserBusinessViewSet
 
 router = DefaultRouter()
 router.register(r"machines", MachineViewSet)
@@ -34,6 +36,8 @@ router.register(r"configuration-channels", ConfigurationChannelViewSet)
 router.register(r"machine-candidates", MachineCandidateViewSet)
 router.register(r"alerts", AlertViewSet)
 router.register(r"alert-history", AlertHistoryViewSet, basename="alert-history")
+router.register(r"users", UserViewSet)
+router.register(r"user-businesses", UserBusinessViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),

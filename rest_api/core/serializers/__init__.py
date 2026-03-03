@@ -11,6 +11,8 @@ from .Notification.serializers import NotificationSerializer
 from .Permission.serializers import PermissionSerializer
 from .Role.serializers import RoleSerializer
 from .UserRole.serializers import UserRoleSerializer
+from .User.serializers import UserSerializer
+from .UserBusiness.serializers import UserBusinessSerializer
 
 __all__ = [
     "AlertSerializer",
@@ -26,4 +28,6 @@ __all__ = [
     "PermissionSerializer",
     "RoleSerializer",
     "UserRoleSerializer",
+    "UserSerializer",
+    "UserBusinessSerializer",
 ]

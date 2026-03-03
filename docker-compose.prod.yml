@@ -48,3 +48,29 @@ services:
     depends_on:
       - mosquitto
       - redis
+
+  celery_worker:
+    image: ghcr.io/felipesantander/garden.homesuit.cl/rest-api:0.0.1
+    container_name: garden_celery_worker_prod
+    restart: always
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=mongodb://root:example@192.168.1.134:27017/
+      - REDIS_HOST=redis
+    command: celery -A garden_api worker -l info
+    depends_on:
+      - redis
+      - rest_api
+
+  celery_beat:
+    image: ghcr.io/felipesantander/garden.homesuit.cl/rest-api:0.0.1
+    container_name: garden_celery_beat_prod
+    restart: always
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=mongodb://root:example@192.168.1.134:27017/
+      - REDIS_HOST=redis
+    command: celery -A garden_api beat -l info
+    depends_on:
+      - redis
+      - rest_api

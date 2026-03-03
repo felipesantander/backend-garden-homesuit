@@ -12,6 +12,7 @@ from .notification import Notification
 from .permission import Permission
 from .role import Role
 from .user_role import UserRole
+from .user_business import UserBusiness
 
 __all__ = [
     "Alert",
@@ -29,4 +30,5 @@ __all__ = [
     "Permission",
     "Role",
     "UserRole",
+    "UserBusiness",
 ]
