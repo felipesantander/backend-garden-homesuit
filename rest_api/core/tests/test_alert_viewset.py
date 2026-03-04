@@ -17,7 +17,7 @@ class TestAlertViewSet:
             "machines": [str(machine.machineId)],
             "criteria": [
                 {"channel": str(channel1.idChannel), "condition": ">", "threshold": 30.0},
-                {"channel": str(channel2.idChannel), "condition": "<", "threshold": 40.0}
+                {"channel": str(channel2.idChannel), "condition": "<", "threshold": 40.0, "logical_operator": "OR"}
             ],
             "duration": 600,
             "data_frequency": "1_minutes"
@@ -34,6 +34,12 @@ class TestAlertViewSet:
         alert = Alert.objects.get(idAlert=alert_id)
         assert alert.criteria.count() == 2
         assert alert.machines.count() == 1
+        
+        criteria = list(alert.criteria.all())
+        assert criteria[0].order == 0
+        assert criteria[0].logical_operator == "AND"
+        assert criteria[1].order == 1
+        assert criteria[1].logical_operator == "OR"
 
     def test_update_alert_criteria(self, authenticated_client):
         channel = Channel.objects.create(name="Channel")

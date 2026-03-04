@@ -37,7 +37,7 @@ def trigger_alert(alert, machine, triggered_criteria, persistence_seconds=None):
     
     # Send WhatsApp notifications
     message = f"🚨 *ALERTA: {alert.name}*\n"
-    message += f"Máquina: {machine.serial}\n"
+    message += f"Máquina: {machine.Name} ({machine.serial})\n"
     
     if persistence_seconds:
         message += f"⏱️ *Tiempo persistencia: {format_duration(persistence_seconds)}*\n"
@@ -82,7 +82,9 @@ def monitor_alerts_task():
             # Fetch or create AlertState for this machine
             state, created = AlertState.objects.get_or_create(alert=alert, machine=machine)
             
-            for criterion in alert.criteria.all():
+            criteria_results = []
+
+            for index, criterion in enumerate(alert.criteria.all()):
                 # Fetch relevant data buckets using PyMongo directly to bypass Djongo bugs
                 from core.models.data_manager import DataBucketManager
                 db = DataBucketManager.get_db()
@@ -109,6 +111,10 @@ def monitor_alerts_task():
                 for bucket in data_buckets:
                     # Note: When using PyMongo, we get dictionaries, not model instances
                     readings_list = bucket.get('readings', [])
+                    if isinstance(readings_list, str):
+                        import json
+                        readings_list = json.loads(readings_list)
+                            
                     logger.info(f"[Monitor] Investigating bucket with {len(readings_list)} readings.")
                     for reading in readings_list:
                         logger.info(f"-> Analizando reading: {reading}")
@@ -136,33 +142,35 @@ def monitor_alerts_task():
                 
                 logger.info(f"[Monitor] Found {len(relevant_readings)} relevant readings in timeframe.")
                 
+                criterion_met = True
+
                 if not relevant_readings:
                     logger.info(f"[Monitor] NO readings found for {criterion.channel.name}. Criteria NOT met.")
-                    all_criteria_met = False
-                    break
-                
-                condition_persists = True
-                for rd in relevant_readings:
-                    val = rd.get('v') if 'v' in rd else rd.get('value')
-                    if val is None: continue
-                    
-                    cond = criterion.condition
-                    thresh = criterion.threshold
-                    
-                    is_met = False
-                    if cond == '>' and (val > thresh): is_met = True
-                    elif cond == '<' and (val < thresh): is_met = True
-                    elif cond == '=' and (val == thresh): is_met = True
-                    
-                    if not is_met:
-                        logger.info(f"[Monitor] Value {val} does NOT meet {cond} {thresh}. Condition failed.")
-                        condition_persists = False
-                        break
-                
-                if not condition_persists:
-                    all_criteria_met = False
-                    break
+                    criterion_met = False
                 else:
+                    for rd in relevant_readings:
+                        val = rd.get('v') if 'v' in rd else rd.get('value')
+                        if val is None: continue
+                        
+                        cond = criterion.condition
+                        thresh = criterion.threshold
+                        
+                        is_met = False
+                        if cond == '>' and (val > thresh): is_met = True
+                        elif cond == '<' and (val < thresh): is_met = True
+                        elif cond == '=' and (val == thresh): is_met = True
+                        
+                        if not is_met:
+                            logger.info(f"[Monitor] Value {val} does NOT meet {cond} {thresh}. Condition failed.")
+                            criterion_met = False
+                            break
+                            
+                criteria_results.append({
+                    "met": criterion_met,
+                    "operator": criterion.logical_operator if index > 0 else None
+                })
+                
+                if criterion_met:
                     logger.info(f"[Monitor] ALL {len(relevant_readings)} readings met {criterion.channel.name} {criterion.condition} {criterion.threshold}")
                     triggered_details.append({
                         "channel": criterion.channel.name,
@@ -172,9 +180,21 @@ def monitor_alerts_task():
                     # Use the oldest reading of the criterion that met the alert to define general persistence
                     # The actual persistence of the whole alert is the minimum duration among criteria
                     # which is equivalent to saying all criteria were met starting from the LATEST of the oldest readings.
-                    if overall_oldest_reading_time is None or criterion_oldest_reading_time > overall_oldest_reading_time:
+                    if overall_oldest_reading_time is None or (criterion_oldest_reading_time and criterion_oldest_reading_time > overall_oldest_reading_time):
                         overall_oldest_reading_time = criterion_oldest_reading_time
             
+            # Evaluate logical expression
+            if not criteria_results:
+                all_criteria_met = False
+            else:
+                expression = str(criteria_results[0]["met"])
+                for res in criteria_results[1:]:
+                    op = "and" if res["operator"] == "AND" else "or"
+                    expression += f" {op} {str(res['met'])}"
+
+                all_criteria_met = eval(expression)
+                logger.info(f"[Monitor] Logical expression: {expression} => {all_criteria_met}")
+
             # STATE LOGIC
             if all_criteria_met and alert.criteria.exists():
                 state.last_condition_met_at = now

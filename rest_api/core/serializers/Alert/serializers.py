@@ -4,7 +4,7 @@ from core.models import Alert, AlertCriteria, Machine, Channel
 class AlertCriteriaSerializer(serializers.ModelSerializer):
     class Meta:
         model = AlertCriteria
-        fields = ['idAlertCriteria', 'channel', 'condition', 'threshold']
+        fields = ['idAlertCriteria', 'channel', 'condition', 'threshold', 'logical_operator', 'order']
         read_only_fields = ['idAlertCriteria']
 
 class AlertSerializer(serializers.ModelSerializer):
@@ -23,7 +23,8 @@ class AlertSerializer(serializers.ModelSerializer):
         machines_data = validated_data.pop('machines')
         alert = Alert.objects.create(**validated_data)
         alert.machines.set(machines_data)
-        for criterion_data in criteria_data:
+        for index, criterion_data in enumerate(criteria_data):
+            criterion_data['order'] = criterion_data.get('order', index)
             AlertCriteria.objects.create(alert=alert, **criterion_data)
         return alert
 
@@ -42,7 +43,8 @@ class AlertSerializer(serializers.ModelSerializer):
         if criteria_data is not None:
             # Simple approach: clear and recreate
             instance.criteria.all().delete()
-            for criterion_data in criteria_data:
+            for index, criterion_data in enumerate(criteria_data):
+                criterion_data['order'] = criterion_data.get('order', index)
                 AlertCriteria.objects.create(alert=instance, **criterion_data)
 
         return instance

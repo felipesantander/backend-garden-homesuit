@@ -30,10 +30,10 @@ class TestAlertTasks:
         # Create a bucket for the current hour
         base_date = now.replace(minute=0, second=0, microsecond=0)
         
-        # Readings for the last 2 minutes, all > 20.0
+        # Readings for the last 2 minutes, all > 20.0 (MongoDB format is {v: float, t: str, f: str})
         readings = [
-            {"value": 25.0, "timestamp": (now - timedelta(seconds=10)).isoformat(), "frequency": 60},
-            {"value": 26.0, "timestamp": (now - timedelta(seconds=40)).isoformat(), "frequency": 60},
+            {"v": 25.0, "t": (now - timedelta(seconds=10)).isoformat(), "f": 60},
+            {"v": 26.0, "t": (now - timedelta(seconds=40)).isoformat(), "f": 60},
         ]
         
         Data.objects.create(
@@ -47,15 +47,16 @@ class TestAlertTasks:
             count=len(readings)
         )
 
-        # 3. Mock trigger_alert to check if it's called
-        mock_trigger = mocker.patch('core.tasks.alerts.trigger_alert')
+        # 3. Mock send_whatsapp_message to check if it's called
+        mock_send = mocker.patch('core.tasks.alerts.send_whatsapp_message')
 
         # 4. Run Task
         result = monitor_alerts_task()
         
         # 5. Assertions
         assert result == "Alert monitoring complete."
-        assert mock_trigger.called
+        # No contacts where added to alert but we just check the function ran ok. 
+        # For simplicity, if AlertHistory.count == 1 we know trigger_alert was fired.
         
         # Verify history record
         assert AlertHistory.objects.count() == 1
@@ -82,7 +83,7 @@ class TestAlertTasks:
 
         now = timezone.now()
         readings = [
-            {"value": 15.0, "timestamp": (now - timedelta(seconds=10)).isoformat(), "frequency": 60},
+            {"v": 15.0, "t": (now - timedelta(seconds=10)).isoformat(), "f": 60},
         ]
         
         Data.objects.create(
@@ -91,7 +92,44 @@ class TestAlertTasks:
             readings=readings, count=len(readings)
         )
 
-        mock_trigger = mocker.patch('core.tasks.alerts.trigger_alert')
+        mock_send = mocker.patch('core.tasks.alerts.send_whatsapp_message')
         monitor_alerts_task()
         
-        assert not mock_trigger.called
+        assert AlertHistory.objects.count() == 0
+
+    def test_monitor_alerts_task_and_or_logic(self, mocker):
+        channel_a = Channel.objects.create(name="A")
+        channel_b = Channel.objects.create(name="B")
+        channel_c = Channel.objects.create(name="C")
+        machine = Machine.objects.create(serial="MT3", Name="Logic Test")
+        
+        alert = Alert.objects.create(
+            name="Logic Alert",
+            duration=60,
+            data_frequency="1_minutes"
+        )
+        alert.machines.add(machine)
+        
+        # Criteria: (A > 10 AND B > 10) OR C > 10
+        AlertCriteria.objects.create(alert=alert, channel=channel_a, condition=">", threshold=10.0, order=0)
+        AlertCriteria.objects.create(alert=alert, channel=channel_b, condition=">", threshold=10.0, logical_operator="AND", order=1)
+        AlertCriteria.objects.create(alert=alert, channel=channel_c, condition=">", threshold=10.0, logical_operator="OR", order=2)
+        
+        now = timezone.now()
+        readings_a = [{"v": 5.0, "t": (now - timedelta(seconds=10)).isoformat()}] # Fails A > 10
+        readings_b = [{"v": 5.0, "t": (now - timedelta(seconds=10)).isoformat()}] # Fails B > 10
+        readings_c = [{"v": 15.0, "t": (now - timedelta(seconds=10)).isoformat()}] # Passes C > 10
+        
+        base_date = now.replace(minute=0, second=0, microsecond=0)
+        for ch, rd in [(channel_a, readings_a), (channel_b, readings_b), (channel_c, readings_c)]:
+            Data.objects.create(
+                machineId=machine, channelId=ch, type="test", serial_machine="MT3",
+                frequency="1_minutes", base_date=base_date,
+                readings=rd, count=1
+            )
+            
+        mock_send = mocker.patch('core.tasks.alerts.send_whatsapp_message')
+        monitor_alerts_task()
+        
+        # (False AND False) OR True -> True, so it should trigger
+        assert AlertHistory.objects.count() == 1

@@ -30,6 +30,8 @@ def superadmin_role(db):
             {"path": "/api/user-roles/*", "host": "*", "method": "*"},
             {"path": "/api/configuration-channels/*", "host": "*", "method": "*"},
             {"path": "/api/machine-candidates/*", "host": "*", "method": "*"},
+            {"path": "/api/alerts/*", "host": "*", "method": "*"},
+            {"path": "/api/user-businesses/*", "host": "*", "method": "*"},
         ]
     )
     # Create Role

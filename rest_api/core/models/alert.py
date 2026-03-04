@@ -28,11 +28,21 @@ class AlertCriteria(models.Model):
         ('=', 'Equal to'),
     ]
 
+    LOGICAL_OPERATOR_CHOICES = [
+        ('AND', 'AND'),
+        ('OR', 'OR'),
+    ]
+
     idAlertCriteria = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     alert = models.ForeignKey(Alert, on_delete=models.CASCADE, related_name='criteria')
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE)
     condition = models.CharField(max_length=1, choices=CONDITION_CHOICES)
     threshold = models.FloatField()
+    logical_operator = models.CharField(max_length=3, choices=LOGICAL_OPERATOR_CHOICES, default='AND')
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
 
     def __str__(self):
-        return f"{self.alert.name} - {self.channel.name} {self.condition} {self.threshold}"
+        return f"{self.alert.name} - [{self.order}] {self.logical_operator} {self.channel.name} {self.condition} {self.threshold}"
