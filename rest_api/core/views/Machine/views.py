@@ -7,9 +7,10 @@ from core.models import Machine, Channel, ConfigurationChannel
 from core.serializers import MachineSerializer
 from core.serializers.Machine.register import MachineRegistrationSerializer
 from core.serializers.Machine.update import MachineUpdateSerializer
+from core.views.mixins import BusinessFilterMixin
 
 
-class MachineViewSet(viewsets.ModelViewSet):
+class MachineViewSet(BusinessFilterMixin, viewsets.ModelViewSet):
     queryset = Machine.objects.all()
     serializer_class = MachineSerializer
 

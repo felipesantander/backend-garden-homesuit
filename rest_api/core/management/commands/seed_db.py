@@ -50,7 +50,47 @@ class Command(BaseCommand):
             'endpoints': [
                 {'path': '/api/*', 'host': '*', 'method': '*'},
             ],
-            'components': ['admin_panel', 'dashboard', 'settings']
+            'machines': ["9405bfd9-75e0-4688-8cc3-353450a32944"],
+            'components': [
+                'dashboard',
+                'dashboard_filter_by_business',
+                'dashboard_filter_by_garden',
+                'dashboard_add_machine',
+                'dashboard_see_machine',
+                'dashboard_config_machine',
+                'dashboard_delete_machine',
+                'machine_candidates',
+                'channels',
+                'channels_add',
+                'channels_see',
+                'channels_config',
+                'channels_delete',
+                'gardens',
+                'gardens_add',
+                'gardens_see',
+                'gardens_config',
+                'gardens_delete',
+                'users',
+                'users_add',
+                'users_see',
+                'users_config',
+                'users_delete',
+                'businesses',
+                'businesses_add',
+                'businesses_see',
+                'businesses_config',
+                'businesses_delete',
+                'alerts',
+                'alerts_add',
+                'alerts_see',
+                'alerts_config',
+                'alerts_delete',
+                'roles_permissions',
+                'roles_permissions_add',
+                'roles_permissions_see',
+                'roles_permissions_config',
+                'roles_permissions_delete',
+            ]
         }
         
         db.core_permission.replace_one(
@@ -61,6 +101,157 @@ class Command(BaseCommand):
         perm = db.core_permission.find_one({'name': perm_data['name']})
         perm_id = perm['idPermission']
         self.stdout.write(f'Permission "{perm["name"]}" updated/synchronized.')
+
+        # 3.1.b View Machine Permission
+        view_machine_data = {
+            'idPermission': uuid.uuid4(),
+            'name': 'View Machine',
+            'endpoints': [{'path': '/api/machines/*', 'host': '*', 'method': 'GET'}],
+            'components': ['dashboard_see_machine', 'machine_candidates']
+        }
+        db.core_permission.replace_one({'name': view_machine_data['name']}, view_machine_data, upsert=True)
+        self.stdout.write('Permission "View Machine" updated/synchronized.')
+
+        # 3.1.c Edit Machine Permission
+        edit_machine_data = {
+            'idPermission': uuid.uuid4(),
+            'name': 'Edit Machine',
+            'endpoints': [
+                {'path': '/api/machines/*', 'host': '*', 'method': 'PUT'},
+                {'path': '/api/machines/*', 'host': '*', 'method': 'PATCH'}
+            ],
+            'components': ['dashboard_config_machine']
+        }
+        db.core_permission.replace_one({'name': edit_machine_data['name']}, edit_machine_data, upsert=True)
+        self.stdout.write('Permission "Edit Machine" updated/synchronized.')
+
+        # 3.1.d Create and Delete Machine Permission
+        create_delete_machine_data = {
+            'idPermission': uuid.uuid4(),
+            'name': 'Create and Delete Machine',
+            'endpoints': [
+                {'path': '/api/machines/*', 'host': '*', 'method': 'POST'},
+                {'path': '/api/machines/*', 'host': '*', 'method': 'DELETE'}
+            ],
+            'components': ['dashboard_add_machine', 'dashboard_delete_machine']
+        }
+        db.core_permission.replace_one({'name': create_delete_machine_data['name']}, create_delete_machine_data, upsert=True)
+        self.stdout.write('Permission "Create and Delete Machine" updated/synchronized.')
+
+        # 3.1.e Channels Permissions
+        db.core_permission.replace_one({'name': 'View Channel'}, {
+            'idPermission': uuid.uuid4(),
+            'name': 'View Channel',
+            'endpoints': [{'path': '/api/channels/*', 'host': '*', 'method': 'GET'}],
+            'components': ['channels', 'channels_see']
+        }, upsert=True)
+        db.core_permission.replace_one({'name': 'Edit Channel'}, {
+            'idPermission': uuid.uuid4(),
+            'name': 'Edit Channel',
+            'endpoints': [
+                {'path': '/api/channels/*', 'host': '*', 'method': 'PUT'},
+                {'path': '/api/channels/*', 'host': '*', 'method': 'PATCH'}
+            ],
+            'components': ['channels_config']
+        }, upsert=True)
+        db.core_permission.replace_one({'name': 'Create and Delete Channel'}, {
+            'idPermission': uuid.uuid4(),
+            'name': 'Create and Delete Channel',
+            'endpoints': [
+                {'path': '/api/channels/*', 'host': '*', 'method': 'POST'},
+                {'path': '/api/channels/*', 'host': '*', 'method': 'DELETE'}
+            ],
+            'components': ['channels_add', 'channels_delete']
+        }, upsert=True)
+        self.stdout.write('Permissions for Channels updated/synchronized.')
+
+        # 3.1.f Data Permissions
+        db.core_permission.replace_one({'name': 'View Data'}, {
+            'idPermission': uuid.uuid4(),
+            'name': 'View Data',
+            'endpoints': [
+                {'path': '/api/data/*', 'host': '*', 'method': 'GET'},
+                {'path': '/api/data/latest/*', 'host': '*', 'method': 'GET'},
+                {'path': '/api/data/query/*', 'host': '*', 'method': 'GET'}
+            ],
+            'components': ['dashboard']
+        }, upsert=True)
+        db.core_permission.replace_one({'name': 'Edit Data'}, {
+            'idPermission': uuid.uuid4(),
+            'name': 'Edit Data',
+            'endpoints': [
+                {'path': '/api/data/*', 'host': '*', 'method': 'PUT'},
+                {'path': '/api/data/*', 'host': '*', 'method': 'PATCH'}
+            ],
+            'components': []
+        }, upsert=True)
+        db.core_permission.replace_one({'name': 'Create and Delete Data'}, {
+            'idPermission': uuid.uuid4(),
+            'name': 'Create and Delete Data',
+            'endpoints': [
+                {'path': '/api/data/*', 'host': '*', 'method': 'POST'},
+                {'path': '/api/data/*', 'host': '*', 'method': 'DELETE'}
+            ],
+            'components': []
+        }, upsert=True)
+        self.stdout.write('Permissions for Data updated/synchronized.')
+
+        # 3.1.g Gardens Permissions
+        db.core_permission.replace_one({'name': 'View Garden'}, {
+            'idPermission': uuid.uuid4(),
+            'name': 'View Garden',
+            'endpoints': [{'path': '/api/gardens/*', 'host': '*', 'method': 'GET'}],
+            'components': ['gardens', 'gardens_see']
+        }, upsert=True)
+        db.core_permission.replace_one({'name': 'Edit Garden'}, {
+            'idPermission': uuid.uuid4(),
+            'name': 'Edit Garden',
+            'endpoints': [
+                {'path': '/api/gardens/*', 'host': '*', 'method': 'PUT'},
+                {'path': '/api/gardens/*', 'host': '*', 'method': 'PATCH'}
+            ],
+            'components': ['gardens_config']
+        }, upsert=True)
+        db.core_permission.replace_one({'name': 'Create and Delete Garden'}, {
+            'idPermission': uuid.uuid4(),
+            'name': 'Create and Delete Garden',
+            'endpoints': [
+                {'path': '/api/gardens/*', 'host': '*', 'method': 'POST'},
+                {'path': '/api/gardens/*', 'host': '*', 'method': 'DELETE'}
+            ],
+            'components': ['gardens_add', 'gardens_delete']
+        }, upsert=True)
+        self.stdout.write('Permissions for Gardens updated/synchronized.')
+
+        # 3.1.h Alerts Permissions
+        alert_endpoints = ['/api/alerts/*', '/api/alert-states/*', '/api/alert-histories/*']
+        db.core_permission.replace_one({'name': 'View Alert'}, {
+            'idPermission': uuid.uuid4(),
+            'name': 'View Alert',
+            'endpoints': [{'path': ep, 'host': '*', 'method': 'GET'} for ep in alert_endpoints],
+            'components': ['alerts', 'alerts_see']
+        }, upsert=True)
+        db.core_permission.replace_one({'name': 'Edit Alert'}, {
+            'idPermission': uuid.uuid4(),
+            'name': 'Edit Alert',
+            'endpoints': [
+                {'path': ep, 'host': '*', 'method': 'PUT'} for ep in alert_endpoints
+            ] + [
+                {'path': ep, 'host': '*', 'method': 'PATCH'} for ep in alert_endpoints
+            ],
+            'components': ['alerts_config']
+        }, upsert=True)
+        db.core_permission.replace_one({'name': 'Create and Delete Alert'}, {
+            'idPermission': uuid.uuid4(),
+            'name': 'Create and Delete Alert',
+            'endpoints': [
+                {'path': ep, 'host': '*', 'method': 'POST'} for ep in alert_endpoints
+            ] + [
+                {'path': ep, 'host': '*', 'method': 'DELETE'} for ep in alert_endpoints
+            ],
+            'components': ['alerts_add', 'alerts_delete']
+        }, upsert=True)
+        self.stdout.write('Permissions for Alerts (Alert, State, History) updated/synchronized.')
 
         # 3.2 Role
         role_data = {
